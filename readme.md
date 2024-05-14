@@ -2,4 +2,26 @@
 
 ## Triatlon Yarışı Projesi
 
-Bu proje, OOP (Object-Oriented Programming) ve CUDA CPP (Compute Unified Device Architecture C++) kullanarak Ubuntu üzerinde triatlon yarışını çözmek için bir çözüm sunar. Proje, 300 takımdan oluşan ve her takımda 3 sporcu bulunan bir triatlon yarışını simüle etmektedir.
+
+Bu proje, Ubuntu üzerinde OOP (Object-Oriented Programming) ve CUDA CPP (Compute Unified Device Architecture C++) kullanarak 300 takım ve her takımda 3 sporcu bulunan bir triatlon yarışını her yarışmacı için eş zamanlı simüle etmeyi amaçlamaktadır.
+
+
+## Sistem Özellikleri
+
+- VmWare Sanal Makine üzerinde çalışan Ubuntu 22.04
+- Ram 4gb
+- İşlemci çekirdeği 2
+
+
+## Proje Adımları
+
+- [ ] Proje Yapısını Hazırlama
+  - [ ] Ubuntu 22.04 e Cuda kurulumlarını ve ayarları.
+  - [ ] C++ proje klasörünü oluşturun ve gerekli kaynak dosyalarının eklenmesi.
+
+
+- [ ] Sınıf Yapısını Oluşturma
+  - [ ] `Sporcu` sınıfı: Sporcuların konum, hız ve diğer özelliklerini tutan bir sınıf
+  - [ ] `Takim` sınıfı: Takımları temsil eden bir sınıf
+  - [ ] `Triatlon` sınıfı: Triatlon yarışını yöneten ana sınıf
+
