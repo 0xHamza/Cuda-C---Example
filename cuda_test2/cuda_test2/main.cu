@@ -1,4 +1,4 @@
-﻿#include <iostream>
+#include <iostream>
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include <random>
@@ -19,6 +19,8 @@ public:
 
     __device__ __host__ void updatePosition(double time) {
         position += speed * time;
+     
+        //std::cout << "Sporcu " << getId() << ": "<<time <<"sn \t" << getPosition() << " metre" << std::endl;
     }
 
     __device__ __host__ double getPosition() {
@@ -64,10 +66,12 @@ public:
 
 
 __global__ void simulateRaceKernel(Sporcu* athletes, int numAthletes, double time) {
-    int idx = threadIdx.x + blockIdx.x * blockDim.x;
-    //printf("idx %d\n",idx);
-    if (idx < numAthletes) {
-        athletes[idx].updatePosition(time);
+
+    int threadId = threadIdx.x + blockIdx.x * blockDim.x;
+
+    if (threadId < numAthletes) {
+        athletes[threadId].updatePosition(time);
+        printf("Sporcu  %d: %0.2fsn \t %0.2f metre\n", athletes[threadId].getId(), time, athletes[threadId].getPosition());
     }
 }
 
@@ -77,8 +81,8 @@ int main() {
     int birTakimdakiSporcuSayisi = 3;
     int toplamSporcuSayisi = takimSayisi * birTakimdakiSporcuSayisi;
 
-    int blockSize = 400;
-    int numBlocks = (toplamSporcuSayisi + blockSize - 1) / blockSize;
+    int blockSize = 640;  //GTX1050 icin max 640 thread, 
+    int blockCount = (toplamSporcuSayisi + blockSize - 1) / blockSize;
 
 
     //Takimlar ve sprocular olusturulur.
@@ -97,12 +101,9 @@ int main() {
             athletesHost[athleteIndex] = Sporcu(athleteId, (double)rand() / RAND_MAX * 5.0 + 1.0);
 
             teamsHost[i].addAthlete(athletesHost[athleteIndex]);
-            std::cout<<"Athlete " << athleteId << " added to team " << i << std::endl;
+            //std::cout<<"Athlete " << athleteId << " added to team " << i << std::endl;
         }
 	}
-
-
-
 
     //Paralel hesaplama icin sporcularin GPU kopyasi olusturulur.
     Sporcu* athletesDevice;
@@ -110,23 +111,18 @@ int main() {
     cudaMemcpy(athletesDevice, athletesHost, toplamSporcuSayisi * sizeof(Sporcu), cudaMemcpyHostToDevice);
 
     for (int i = 0; i < 100; i++) { // simulate 100 seconds
-        simulateRaceKernel << <numBlocks, blockSize >> > (athletesDevice, toplamSporcuSayisi, 1.0);
+        simulateRaceKernel <<<blockCount, blockSize >>> (athletesDevice, toplamSporcuSayisi, i);
         cudaDeviceSynchronize();
 
         // print updated positions
         cudaMemcpy(athletesHost, athletesDevice, toplamSporcuSayisi * sizeof(Sporcu), cudaMemcpyDeviceToHost);
         for (int j = 0; j < toplamSporcuSayisi; j++) {
-            std::cout << "Athlete " << athletesHost[j].getId() << ": " << athletesHost[j].getPosition() << " meters" << std::endl;
+            //std::cout << "Athlete " << athletesHost[j].getId() << ": " << athletesHost[j].getPosition() << " meters" << std::endl;
         }
     }
 
     cudaFreeHost(athletesHost);
     cudaFree(athletesDevice);
 
-
-
     return 0;
 }
-    
-   
- 
