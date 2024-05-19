@@ -110,7 +110,7 @@ int main() {
     cudaMemcpy(athletesDevice, athletesHost, toplamSporcuSayisi * sizeof(Sporcu), cudaMemcpyHostToDevice);
 
     for (int i = 0; i < 100; i++) { // simulate 100 seconds
-        simulateRaceKernel << <numBlocks, blockSize >> > (athletesDevice, numAthletes, 1.0);
+        simulateRaceKernel << <numBlocks, blockSize >> > (athletesDevice, toplamSporcuSayisi, 1.0);
         cudaDeviceSynchronize();
 
         // print updated positions
