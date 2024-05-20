@@ -5,6 +5,7 @@
 #include <chrono>
 #include <string>
 #include <vector>
+#include <sstream>
 
 class Parkur {
 private:
@@ -33,11 +34,14 @@ private:
     double speed;
     double position;
     int id;
+    int teamId;
 
 public:
     __device__ __host__ Sporcu() : id(-1), speed(0), position(0.0) {}
 
     __device__ __host__ Sporcu(int id, double speed) : id(id), speed(speed), position(0.0) {}
+
+    __device__ __host__ Sporcu(int id, int tid, double speed) : id(id), teamId(tid), speed(speed), position(0.0) {}
 
     __device__ __host__ void updatePosition(double time) {
         position += speed * time;
@@ -146,13 +150,21 @@ public:
 	}
 };
 
-__global__ void simulateRaceKernel(Sporcu* athletes, int numAthletes, double time) {
+__global__ void simulateRaceKernel(Sporcu* athletes, int numAthletes, double time, int *gosterilecekler, int gosterileceklerSayisi) {
 
     int threadId = threadIdx.x + blockIdx.x * blockDim.x;
 
     if (threadId < numAthletes) {        
         athletes[threadId].updatePosition(time);
-        printf("%d: Sporcu  %d: %0.2fm/s \t %0.2fsn \t %0.2f metre\n", blockIdx.x, athletes[threadId].getId(), athletes[threadId].getSpeed(), time, athletes[threadId].getPosition());
+        //printf("%d: Sporcu  %d: %0.2fm/s \t %0.2fsn \t %0.2f metre\n", blockIdx.x, athletes[threadId].getId(), athletes[threadId].getSpeed(), time, athletes[threadId].getPosition());
+        
+        for (int i = 0; i < gosterileceklerSayisi; i++)
+        {
+            if (athletes[threadId].getId() == gosterilecekler[i])
+                printf("%d: Sporcu  %d: %0.2fm/s \t %0.2fsn \t %0.2f metre\n", blockIdx.x, athletes[threadId].getId(), athletes[threadId].getSpeed(), time, athletes[threadId].getPosition());
+        }
+        
+        
     }
 }
 
@@ -244,7 +256,7 @@ public:
         cudaMallocHost((void**)&athletesHost, toplamSporcuSayisi * sizeof(Sporcu));
 
         int index = 0;
-        //GPU GONDERILECEK Sporculari ekrana yazdir
+        //GPU GONDERILECEK Sporculari cek
         for (int i = 0; i < takimSayisi; i++) {
             
             std::cout << "Takim " << takimlar2[i].getTakimId() << ", " << takimlar2[i].getSporcular().size() << std::endl;
@@ -259,18 +271,34 @@ public:
             }
         }
 
-        std::cout<<"Gecirildi: "<<index<<std::endl;
-
         
-        //print sprocular cpu
-        for (int i = 0; i < toplamSporcuSayisi; i++) {
-			std::cout << ":"<<i<<":Sporcu " << athletesHost[i].getId() << " speed " << athletesHost[i].getSpeed() << std::endl;
-		}
+        std::string gosterilecekler;
+
+        // User input ile gösterilecek takım üyelerinin indekslerini alın
+        std::cout << "Hangi takim uyeleri hesaplama sirasinda ekranda gosterilsin? (Örnek girdi: 0 1 2): ";
+        std::getline(std::cin, gosterilecekler);
+
+        //split gosterilecekler
+   
+        std::istringstream iss(gosterilecekler);
+        int number;
+        int gosterilecekTeamsSayisi = 0;
+        int* gosterilecekTeams = nullptr;
+        while (iss >> number) {
+            gosterilecekTeams = (int*)realloc(gosterilecekTeams, (gosterilecekTeamsSayisi + 1) * sizeof(int));
+            gosterilecekTeams[gosterilecekTeamsSayisi] = number;
+            gosterilecekTeamsSayisi++;
+        }
+
+        int* gosterileceklerDevice;
+        cudaMalloc((void**)&gosterileceklerDevice, gosterilecekTeamsSayisi * sizeof(int));
+        cudaMemcpy(gosterileceklerDevice, gosterilecekTeams, gosterilecekTeamsSayisi * sizeof(int), cudaMemcpyHostToDevice);
 
         Sporcu* athletesDevice;
         cudaMalloc((void**)&athletesDevice, toplamSporcuSayisi * sizeof(Sporcu));
         cudaMemcpy(athletesDevice, athletesHost, toplamSporcuSayisi * sizeof(Sporcu), cudaMemcpyHostToDevice);
             
+
        
         // CUDA çekirdeğini çağır
         int blockSize = 256;
@@ -280,7 +308,7 @@ public:
 
         // 100 saniye simüle et
         for (int i = 0; i < 10; i++) { 
-            simulateRaceKernel<<<blockCount, blockSize >>>(athletesDevice, toplamSporcuSayisi, i);
+            simulateRaceKernel<<<blockCount, blockSize >>>(athletesDevice, toplamSporcuSayisi, i, gosterileceklerDevice, gosterilecekTeamsSayisi);
             cudaDeviceSynchronize();
         }
 
@@ -330,7 +358,7 @@ int main() {
         for (int j = 0; j < birTakimdakiSporcuSayisi; j++) {
             int athleteIndex = i * birTakimdakiSporcuSayisi + j;
             int athleteId = i * birTakimdakiSporcuSayisi + j + 1;
-            athletesHost[athleteIndex] = Sporcu(athleteId, (float)rand() / RAND_MAX * 4.0 + 1.0);
+            athletesHost[athleteIndex] = Sporcu(athleteId, team_id, (float)rand() / RAND_MAX * 4.0 + 1.0);
 
             teamsHost[i].addAthlete(athletesHost[athleteIndex]);
             std::cout<<"::Sporcu " << athleteId << " speed " << athletesHost[athleteIndex].getSpeed() << " added to team " << i << std::endl;
