@@ -31,13 +31,59 @@ Kullanılan işletim sistemi:
 
 ## Proje Adımları
 
-- [ ] Proje Yapısını Hazırlama
-  - [ ] Ubuntu 22.04 e Cuda kurulumlarını ve ayarları.
-  - [ ] C++ proje klasörünü oluşturun ve gerekli kaynak dosyalarının eklenmesi.
+- [x] Proje Yapısını Hazırlama
+  - [x] ~Ubuntu 22.04~ windows 10 Cuda kurulumlarını ve ayarları.
+  - [ ] Vs2022 cuda projesi oluşturma C++ proje linker ve lib o
+gerekli kaynak dosyalarının eklenmesi.
 
 
-- [ ] Sınıf Yapısını Oluşturma
-  - [ ] `Sporcu` sınıfı: Sporcuların konum, hız ve diğer özelliklerini tutan bir sınıf
-  - [ ] `Takim` sınıfı: Takımları temsil eden bir sınıf
-  - [ ] `Triatlon` sınıfı: Triatlon yarışını yöneten ana sınıf
+- [] Sınıf Yapısını Oluşturma
+  - [x] `Sporcu` sınıfı: Sporcuların konum, hız ve diğer özelliklerini tutan bir sınıf
+  - [x] `Takim` sınıfı: Takımları temsil eden bir sınıf
+  - [x] `Triatlon` sınıfı: Triatlon yarışını yöneten ana sınıf
 
+
+
+## eklenen diğer yenilikler
+
+1. **Triathlon Sınıfı**:
+   - Bu sınıf, ana triatlon yarışının yönetiminden sorumludur.
+   - Yarış ayarlama ve başlatma işlemlerini gerçekleştirir.
+   - Takımları ve sporcuları ekleyebilir.
+   - Yarış süresince sporcuların konumlarını ve hızlarını güncelleyebilir.
+
+2. **Parkur Sınıfı**:
+   - Triathlon yarışının üç farklı disiplinini (yüzme, bisiklet, koşu) temsil eder.
+   - Her parkur, zorluğuna göre bir güçlük faktörüne sahiptir.
+   - Sporcuların hızları, parkur zorluğuna göre artırılır.
+
+3. **Takım Sınıfı**:
+   - Her takım, 3 sporcudan oluşur.
+   - Takım içindeki sporcuların bilgilerini (konum, hız, vb.) tutar.
+   - Takımların toplam sürelerini hesaplar.
+
+4. **Sporcu Sınıfı**:
+   - Sporcuların konum, hız ve diğer özelliklerini temsil eder.
+   - Sporcuların parkurlardaki performanslarını simüle eder.
+
+5. **CUDA Fonksiyonları**:
+   - `yarışıAyarla()`: Triathlon yarışını ayarlar, takımları ve sporcuları ekler.
+   - `yarışıBaşlat()`: Yarışı başlatır, sporcuların hızlarını ve konumlarını güncelleyerek her saniye simüle eder.
+   - Bu fonksiyonlar, CUDA iş parçacıkları (threads) kullanılarak paralel olarak çalıştırılacaktır.
+
+## Proje Adımları
+
+1. **Proje Yapısını Hazırlama**:
+   - Windows 10 işletim sistemi üzerinde Visual Studio 2022 kullanılacak.
+   - CUDA kurulumu ve ayarları yapılacak.
+   - C++ proje oluşturulacak, gerekli kaynak dosyaları eklenecek.
+
+2. **Sınıf Yapısını Oluşturma**:
+   - `Sporcu` sınıfı: Sporcuların konum, hız ve diğer özelliklerini tutar.
+   - `Takim` sınıfı: Takımları temsil eder, takım içindeki sporcuların bilgilerini tutar.
+   - `Parkur` sınıfı: Triathlon yarışının üç farklı disiplinini (yüzme, bisiklet, koşu) temsil eder.
+   - `Triatlon` sınıfı: Ana triatlon yarışını yönetir, yarış ayarlama ve başlatma işlemlerini gerçekleştirir.
+
+3. **CUDA Fonksiyonlarının Geliştirilmesi**:
+   - `yarışıAyarla()` fonksiyonu: Takımları ve sporcuları ekler, yarış ayarlarını yapar.
+   - `yarışıBaşlat()` fonksiyonu: Yarışı başlatır, her saniye sporcuların konumlarını ve hızlarını güncelleyerek simülasyonu gerçekleştirir.
